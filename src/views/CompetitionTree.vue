@@ -1,15 +1,24 @@
 <template>
   <div class="tree">
-    <button @click="treeLog">LOG</button>
+    <branch-display :branch="tree.sub[0]" :reverse="true" />
+    <branch-display :branch="tree.sub[1]" :reverse="false" />
   </div>
 </template>
 
 <script lang="ts">
-import { Vue } from "vue-class-component";
-import { Branch, forEachBranch } from "@/branch";
+import { Options, Vue } from "vue-class-component";
+import { Branch } from "@/types";
+import BranchDisplay from "@/components/BranchDisplay.vue";
 
+interface RootBranch extends Branch {
+  sub: [Branch, Branch];
+}
+
+@Options({
+  components: { BranchDisplay },
+})
 export default class CompetitionTree extends Vue {
-  tree: Branch = {
+  dummyBranch: Branch = {
     sub: [
       {
         sub: [],
@@ -66,15 +75,27 @@ export default class CompetitionTree extends Vue {
       },
     ],
   };
-
-  treeLog(): void {
-    forEachBranch(this.tree, (branch, layer, index) => {
-      console.log(
-        `${branch.sub.length} subbranches | ${layer} layer | ${index} index`
-      );
-    });
-  }
+  wmBranch: Branch = {
+    sub: Array<Branch>(2).fill({
+      sub: Array<Branch>(2).fill({
+        sub: Array<Branch>(2).fill({
+          sub: [],
+        }),
+      }),
+    }),
+  };
+  tree: RootBranch = {
+    sub: [this.wmBranch, this.wmBranch],
+  };
 }
 </script>
 
-<style></style>
+<style>
+.tree {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: auto;
+  min-height: 100vh;
+}
+</style>

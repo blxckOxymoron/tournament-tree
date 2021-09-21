@@ -4,16 +4,18 @@
       v-if="branch.sub && branch.sub.length > 0"
       :branch="branch.sub[0]"
       :reverse="true"
+      :parent-slot="_slot"
     />
 
     <div class="team-placeholder" :style="`background: ${slot.color};`">
-      <h2>?</h2>
+      <h2>{{ slot.id }}</h2>
     </div>
 
     <branch-display
       v-if="branch.sub && branch.sub.length > 1"
       :branch="branch.sub[1]"
       :reverse="false"
+      :parent-slot="_slot"
     />
   </div>
 </template>

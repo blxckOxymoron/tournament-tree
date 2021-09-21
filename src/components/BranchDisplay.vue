@@ -7,7 +7,7 @@
       class="team-placeholder"
       :style="`background-color: ${slot ? slot.color : 'orange'};`"
     >
-      <h2>?</h2>
+      <h2>{{ _beaten }}</h2>
     </div>
     <branch-connector :width="reverse ? -32 : 32" :height="cHeight" />
     <div class="children">
@@ -16,14 +16,14 @@
         :key="i"
         :branch="next"
         :reverse="reverse"
-        :parent-slot="slot"
+        :parent-slot="_slot"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Branch, Coords2d } from "@/types";
+import { Branch } from "@/types";
 import { Options, Vue } from "vue-class-component";
 import BranchConnector from "@/components/BranchConnector.vue";
 import { Mutations } from "@/store";
@@ -41,7 +41,7 @@ import { TeamSlot } from "@/types";
 export default class BranchDisplay extends Vue {
   branch!: Branch;
   reverse!: boolean;
-  parentSlotCoords!: Coords2d;
+  parentSlot?: TeamSlot;
 
   cHeight = 0;
   bound?: DOMRect;
@@ -52,10 +52,19 @@ export default class BranchDisplay extends Vue {
     full: false,
     beaten: false,
   };
-  patentSlot = this.slot;
 
-  created(): void {
-    this.patentSlot = this.$store.getters.slot(this.parentSlotCoords);
+  get _slot(): TeamSlot {
+    if (this.parentSlot)
+      this.slot.beaten = this.parentSlot.beaten || this.parentSlot.full;
+    return this.slot;
+  }
+
+  get _Pfull(): boolean {
+    return this.parentSlot?.full || false;
+  }
+
+  get _beaten(): boolean {
+    return this._slot?.beaten || false;
   }
 
   mounted(): void {

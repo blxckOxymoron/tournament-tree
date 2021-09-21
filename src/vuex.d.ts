@@ -1,5 +1,4 @@
 // vuex.d.ts
-import { ComponentCustomProperties } from "vue";
 import { Store } from "vuex";
 import { TeamSlot } from "./types";
 

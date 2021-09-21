@@ -6,7 +6,6 @@
 
 <script lang="ts">
 import CompetitionTree from "./views/CompetitionTree.vue";
-import DebugDots from "@/views/DebugDots.vue";
 import CompetitionTeams from "@/views/CompetitionTeams.vue";
 export default {
   components: { CompetitionTree, CompetitionTeams },

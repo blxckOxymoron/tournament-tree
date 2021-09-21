@@ -1,6 +1,6 @@
 <template>
   <div class="tree">
-    <root-branch-display :branch="tree" :isRoot="true" />
+    <root-branch-display :branch="tree" />
     <!-- <branch-display :branch="tree.sub[0]" :reverse="true" />
     <branch-display :branch="tree.sub[1]" :reverse="false" /> -->
   </div>

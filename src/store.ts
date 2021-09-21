@@ -49,3 +49,14 @@ export function closestPoint(points: Coords2d[], target: Coords2d): Coords2d {
     return pDistance < cDistance ? pSlot : cSlot;
   });
 }
+
+/**
+ * old Id getters
+ *
+    slotId: (state) => (id: number) => {
+      return state.teamSlots.find((sl) => sl.id === id);
+    },
+    nextSlotId: (state) => {
+      return state.nextId++;
+    },
+ */

@@ -3,7 +3,10 @@
     class="branch"
     :style="'flex-direction: ' + (reverse ? 'row-reverse' : 'row') + ';'"
   >
-    <div class="team-placeholder">
+    <div
+      class="team-placeholder"
+      :style="`background-color: ${slot ? slot.color : 'orange'};`"
+    >
       <h2>?</h2>
     </div>
     <branch-connector :width="reverse ? -32 : 32" :height="cHeight" />
@@ -13,48 +16,85 @@
         :key="i"
         :branch="next"
         :reverse="reverse"
+        :parent-slot="slot"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Branch, TeamSlot } from "@/types";
+import { Branch, Coords2d } from "@/types";
 import { Options, Vue } from "vue-class-component";
 import BranchConnector from "@/components/BranchConnector.vue";
+import { Mutations } from "@/store";
+import { TeamSlot } from "@/types";
 
 @Options({
   name: "BranchDisplay",
   props: {
     branch: Object,
     reverse: Boolean,
+    parentSlot: Object,
   },
   components: { BranchDisplay, BranchConnector },
 })
 export default class BranchDisplay extends Vue {
   branch!: Branch;
   reverse!: boolean;
+  parentSlotCoords!: Coords2d;
+
+  cHeight = 0;
+  bound?: DOMRect;
+  slot: TeamSlot = {
+    x: 0,
+    y: 0,
+    color: "orange",
+    full: false,
+    beaten: false,
+  };
+  patentSlot = this.slot;
+
+  created(): void {
+    this.patentSlot = this.$store.getters.slot(this.parentSlotCoords);
+  }
+
+  mounted(): void {
+    this.updateCHeight();
+    const registered = this.registerSlot();
+    if (!registered) console.log("unable to register Slot on mount", this);
+  }
+
+  //? necesarry? useless?
   /*
-  get teamSlot(): TeamSlot {
-    let parentSlot: TeamSlot = {
-      x: 0,
-      y: 0,
-      color: "#fffeee",
-      full: false,
-    };
-    if ("teamSlot" in (this.$parent?.$data || {}))
-      parentSlot = this.$parent?.$data;
+  updated(): void {
+    this.updateCHeight();
   }
   */
 
-  get cHeight(): number {
+  registerSlot(): boolean {
+    const thisEl: Element | undefined = this.$el;
+    if (!thisEl) return false;
+    const placeholder = thisEl.querySelector(":scope > .team-placeholder");
+    if (!placeholder) return false;
+    this.slot = {
+      x: placeholder.getBoundingClientRect().x,
+      y: placeholder.getBoundingClientRect().y,
+      color: "var(--clr-slot-empty)",
+      full: false,
+      beaten: false,
+    };
+    this.$store.commit(Mutations.REGISTER_SLOT, { slot: this.slot });
+    return true;
+  }
+
+  updateCHeight(): void {
+    if (!this.$el) return;
     const thisBound: DOMRect = this.$el.getBoundingClientRect();
     const parentBound: DOMRect = this.$parent?.$el.getBoundingClientRect();
-    return (
+    this.cHeight =
       thisBound.y +
       thisBound.height / 2 -
-      (parentBound.y + parentBound.height / 2)
-    );
+      (parentBound.y + parentBound.height / 2);
   }
 }
 </script>
@@ -68,12 +108,13 @@ export default class BranchDisplay extends Vue {
   .team-placeholder {
     margin: 0.5rem 1rem;
     min-width: var(--width-team);
-    height: 30px;
+    height: var(--height-team);
     padding: 0.5rem;
     border-radius: 2rem;
     text-align: center;
-    background-color: var(--clr-empty);
+    background-color: var(--clr-slot-empty);
     user-select: none;
+    transition: background-color 100ms;
   }
 }
 .children {

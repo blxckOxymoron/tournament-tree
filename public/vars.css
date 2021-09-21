@@ -1,14 +1,17 @@
 :root {
   --clr-bg: rgb(252, 249, 243);
-  --clr-empty: rgb(230, 230, 230);
+  --clr-slot-empty: rgb(230, 230, 230);
+  --clr-slot-snap: rgb(180, 218, 221);
   --clr-text: rgb(24, 24, 31);
   --width-team: 150px;
+  --height-team: 30px;
   --fn-24: 700 24px Arial, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --clr-bg: rgb(24, 24, 31);
-    --clr-empty: rgb(44, 44, 49);
+    --clr-slot-empty: rgb(44, 44, 49);
+    --clr-slot-snap: rgb(53, 104, 109);
     --clr-text: #d6eeff;
   }
 }

@@ -1,11 +1,15 @@
 <template>
+  <!-- <debug-dots /> -->
   <competition-tree />
+  <competition-teams />
 </template>
 
 <script lang="ts">
 import CompetitionTree from "./views/CompetitionTree.vue";
+import DebugDots from "@/views/DebugDots.vue";
+import CompetitionTeams from "@/views/CompetitionTeams.vue";
 export default {
-  components: { CompetitionTree },
+  components: { CompetitionTree, CompetitionTeams },
 };
 </script>
 

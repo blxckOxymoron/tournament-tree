@@ -1,11 +1,13 @@
 // vuex.d.ts
 import { Store } from "vuex";
-import { TeamSlot } from "./types";
+import { StoreSlotCoords, StoreTeamSlot } from "./types";
 
 declare module "@vue/runtime-core" {
   // declare your own store states
   interface State {
-    teamSlots: TeamSlot[];
+    teamSlots: StoreTeamSlot[];
+    slotPositions: StoreSlotCoords[];
+    nextSlotId: number;
   }
 
   // provide typings for `this.$store`

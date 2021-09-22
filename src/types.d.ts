@@ -11,12 +11,14 @@ export interface Coords2d {
   y: number;
 }
 
-export interface TeamSlot extends Coords2d {
-  x: number;
-  y: number;
+export interface StoreTeamSlot {
+  id: number;
   full: boolean;
-  beaten: boolean;
   color: string;
+}
+
+export interface StoreSlotCoords extends Coords2d {
+  id: number;
 }
 
 export interface Team {

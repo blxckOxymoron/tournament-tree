@@ -5,9 +5,9 @@
   >
     <div
       class="team-placeholder"
-      :style="`background-color: ${slot ? slot.color : 'orange'};`"
+      :style="`background-color: ${teamSlot ? teamSlot.color : 'orange'};`"
     >
-      <h2>{{ _beaten }}</h2>
+      <h2>{{ _slotId }}</h2>
     </div>
     <branch-connector :width="reverse ? -32 : 32" :height="cHeight" />
     <div class="children">
@@ -16,55 +16,52 @@
         :key="i"
         :branch="next"
         :reverse="reverse"
-        :parent-slot="_slot"
+        :parent-slot-id="_slotId"
+        :parent-beaten="beaten"
       />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Branch } from "@/types";
+import { Branch, StoreTeamSlot } from "@/types";
 import { Options, Vue } from "vue-class-component";
 import BranchConnector from "@/components/BranchConnector.vue";
 import { Mutations } from "@/store";
-import { TeamSlot } from "@/types";
 
 @Options({
   name: "BranchDisplay",
   props: {
     branch: Object,
     reverse: Boolean,
-    parentSlot: Object,
+    parentSlotId: Number,
+    parentBeaten: Boolean,
   },
   components: { BranchDisplay, BranchConnector },
 })
 export default class BranchDisplay extends Vue {
   branch!: Branch;
   reverse!: boolean;
-  parentSlot?: TeamSlot;
+  parentSlotId!: number;
+  parentBeaten!: boolean;
 
+  slotId = -1;
   cHeight = 0;
-  bound?: DOMRect;
-  slot: TeamSlot = {
-    x: 0,
-    y: 0,
-    color: "orange",
-    full: false,
-    beaten: false,
-  };
 
-  get _slot(): TeamSlot {
-    if (this.parentSlot)
-      this.slot.beaten = this.parentSlot.beaten || this.parentSlot.full;
-    return this.slot;
+  get _slotId(): number {
+    return this.slotId;
   }
 
-  get _Pfull(): boolean {
-    return this.parentSlot?.full || false;
+  get beaten(): boolean {
+    return this.parentBeaten || this.teamSlot?.full || false;
   }
 
-  get _beaten(): boolean {
-    return this._slot?.beaten || false;
+  get parentSlot(): StoreTeamSlot | undefined {
+    return this.$store.getters.slot(this.parentSlotId);
+  }
+
+  get teamSlot(): StoreTeamSlot | undefined {
+    return this.$store.getters.slot(this.slotId);
   }
 
   mounted(): void {
@@ -73,26 +70,22 @@ export default class BranchDisplay extends Vue {
     if (!registered) console.log("unable to register Slot on mount", this);
   }
 
-  //? necesarry? useless?
-  /*
-  updated(): void {
-    this.updateCHeight();
-  }
-  */
-
   registerSlot(): boolean {
     const thisEl: Element | undefined = this.$el;
     if (!thisEl) return false;
+
     const placeholder = thisEl.querySelector(":scope > .team-placeholder");
     if (!placeholder) return false;
-    this.slot = {
-      x: placeholder.getBoundingClientRect().x,
-      y: placeholder.getBoundingClientRect().y,
-      color: "var(--clr-slot-empty)",
-      full: false,
-      beaten: false,
-    };
-    this.$store.commit(Mutations.REGISTER_SLOT, { slot: this.slot });
+
+    this.slotId = this.$store.getters.nextSlotId;
+
+    this.$store.commit(Mutations.REGISTER_SLOT, {
+      id: this.slotId,
+      pos: {
+        x: placeholder.getBoundingClientRect().x,
+        y: placeholder.getBoundingClientRect().y,
+      },
+    });
     return true;
   }
 

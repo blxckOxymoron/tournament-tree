@@ -3,14 +3,15 @@
     class="team"
     @mousedown="startDraging"
     @mouseup="stopDraging"
-    :style="`left: ${x}px; top: ${y}px`"
+    :style="`transform: translate(${x}px, ${y}px)`"
   >
     <h2>{{ team.name }}</h2>
   </div>
 </template>
 
 <script lang="ts">
-import { Team, TeamSlot } from "@/types";
+import { Mutations } from "@/store";
+import { StoreSlotCoords, StoreTeamSlot, Team } from "@/types";
 import { Options, Vue } from "vue-class-component";
 
 @Options({
@@ -24,21 +25,30 @@ export default class TeamDisplay extends Vue {
 
   x = 0;
   y = 0;
+
   dragOffsetX = 0;
   dragOffsetY = 0;
   shift = false;
-  slot?: TeamSlot;
+  slotId = -1;
+
+  get teamSlot(): StoreTeamSlot | undefined {
+    return this.$store.getters.slot(this.slotId);
+  }
+
+  get teamSlotPos(): StoreSlotCoords | undefined {
+    return this.$store.getters.slotPos(this.slotId);
+  }
 
   mounted(): void {
-    this.slot = this.$store.getters.closestOpenSlot(this.x, this.y);
+    /*
+    this.commitMoveClosest();
     this.moveToCurrentSlot();
+    */
   }
 
   moveToCurrentSlot(): void {
-    this.x = this.slot?.x || 0;
-    this.y = this.slot?.y || 0;
-
-    if (this.slot) this.slot.full = true;
+    this.x = this.teamSlotPos?.x || 0;
+    this.y = this.teamSlotPos?.y || 0;
   }
 
   startDraging(e: PointerEvent): void {
@@ -50,8 +60,6 @@ export default class TeamDisplay extends Vue {
     this.$el.classList.add("selected");
 
     this.$el.setPointerCapture(e.pointerId);
-
-    if (this.slot) this.slot.full = false;
   }
 
   stopDraging(e: PointerEvent): void {
@@ -60,26 +68,28 @@ export default class TeamDisplay extends Vue {
     this.$el.classList.remove("selected");
 
     this.$el.releasePointerCapture(e.pointerId);
+    this.commitMoveClosest();
     this.moveToCurrentSlot();
+  }
+
+  commitMoveClosest(): void {
+    const closestSlot: StoreTeamSlot | undefined =
+      this.$store.getters.closestOpenSlot(this.x, this.y);
+
+    console.log(closestSlot?.id);
+    const closestId = closestSlot ? closestSlot.id : -1;
+
+    this.$store.commit(Mutations.MOVE_SLOT, {
+      from: this.slotId,
+      to: closestId,
+    });
+    this.slotId = closestId;
   }
 
   drag(e: PointerEvent): void {
     this.x = e.clientX - this.dragOffsetX;
     this.y = e.clientY - this.dragOffsetY;
 
-    const nextSlot: TeamSlot = this.$store.getters.closestOpenSlot(
-      this.x,
-      this.y
-    );
-
-    if (
-      !this.slot ||
-      (nextSlot && !(nextSlot.x === this.slot.x && nextSlot.y === this.slot.y))
-    ) {
-      if (this.slot) this.slot.color = "var(--clr-slot-empty)";
-      nextSlot.color = "var(--clr-slot-snap)";
-      this.slot = nextSlot;
-    }
     this.x = Math.min(
       Math.max(0, this.x),
       window.innerWidth - (this.bounds?.width || 0)
@@ -88,6 +98,13 @@ export default class TeamDisplay extends Vue {
       Math.max(0, this.y),
       window.innerHeight - (this.bounds?.height || 0)
     );
+
+    const nextSlot: StoreTeamSlot = this.$store.getters.closestOpenSlot(
+      this.x,
+      this.y
+    );
+
+    this.$store.commit(Mutations.MARK_SNAP_SLOT, { id: nextSlot.id });
   }
 
   get bounds(): DOMRect | null {
@@ -108,6 +125,6 @@ export default class TeamDisplay extends Vue {
   height: var(--height-team);
 }
 .team:not(.selected) {
-  transition: top 100ms, left 100ms;
+  transition: transform 100ms;
 }
 </style>

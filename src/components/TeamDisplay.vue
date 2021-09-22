@@ -40,10 +40,8 @@ export default class TeamDisplay extends Vue {
   }
 
   mounted(): void {
-    /*
     this.commitMoveClosest();
     this.moveToCurrentSlot();
-    */
   }
 
   moveToCurrentSlot(): void {
@@ -99,12 +97,16 @@ export default class TeamDisplay extends Vue {
       window.innerHeight - (this.bounds?.height || 0)
     );
 
+    //! debouce with if performance too low! <(
+    // clearTimeout(this.debouceId)
+    // this.debounceId = setTimeout( ===>
     const nextSlot: StoreTeamSlot = this.$store.getters.closestOpenSlot(
       this.x,
       this.y
     );
 
     this.$store.commit(Mutations.MARK_SNAP_SLOT, { id: nextSlot.id });
+    //! )>
   }
 
   get bounds(): DOMRect | null {

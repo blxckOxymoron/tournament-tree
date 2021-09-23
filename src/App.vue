@@ -1,5 +1,4 @@
 <template>
-  <!-- <debug-dots /> -->
   <competition-tree />
   <competition-teams />
 </template>

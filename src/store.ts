@@ -1,17 +1,26 @@
 import { State } from "vue";
 import { createStore } from "vuex";
 import { SlotColors } from "./main";
-import { Coords2d, StoreTeamSlot } from "./types";
+import { Coords2d, StoreTeamSlot, Team } from "./types";
 
 export const store = createStore({
   state(): State {
     return {
       teamSlots: [],
       slotPositions: [],
+      teams: [],
       nextSlotId: 0,
+      nextTeamId: 0,
     };
   },
   mutations: {
+    registerTeam(state: State, payload: { id: number; team: Team }) {
+      state.teams.push({
+        ...payload.team,
+        id: payload.id,
+      });
+      state.nextTeamId++;
+    },
     registerSlot(state: State, payload: { id: number; pos: Coords2d }) {
       state.teamSlots.push({
         id: payload.id,
@@ -25,11 +34,22 @@ export const store = createStore({
       });
       state.nextSlotId++;
     },
-    moveSlot(state: State, payload: { from: number; to: number }) {
-      const fromSl = state.teamSlots[payload.from];
-      if (fromSl) fromSl.full = false;
-      const toSl = state.teamSlots[payload.to];
-      if (toSl) toSl.full = true;
+    moveSlot(
+      state: State,
+      payload: { from: number; to: number; team: number }
+    ) {
+      const fromSl = state.teamSlots.find((sl) => sl.id === payload.from);
+      if (fromSl) {
+        fromSl.full = false;
+        fromSl.color = SlotColors.EMPTY;
+      }
+      const toSl = state.teamSlots.find((sl) => sl.id === payload.to);
+      if (toSl) {
+        toSl.full = true;
+        toSl.color =
+          state.teams.find((tm) => tm.id === payload.team)?.color ||
+          SlotColors.EMPTY;
+      }
     },
     markSnapSlot(
       state: State,
@@ -68,17 +88,24 @@ export const store = createStore({
     slot: (state) => (id: number) => {
       return state.teamSlots.find((sl) => sl.id === id);
     },
+    team: (state) => (id: number) => {
+      return state.teams.find((tm) => tm.id === id);
+    },
     slotPos: (state) => (id: number) => {
       return state.slotPositions.find((pos) => pos.id === id);
     },
     nextSlotId: (state) => {
       return state.nextSlotId;
     },
+    nextTeamId: (state) => {
+      return state.nextTeamId;
+    },
   },
 });
 
 export const Mutations = {
   REGISTER_SLOT: "registerSlot",
+  REGISTER_TEAM: "registerTeam",
   MOVE_SLOT: "moveSlot",
   MARK_SNAP_SLOT: "markSnapSlot",
 };

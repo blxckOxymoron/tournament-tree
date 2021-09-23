@@ -25,3 +25,7 @@ export interface Team {
   color: string;
   name: string;
 }
+
+export interface StoreTeam extends Team {
+  id: number;
+}

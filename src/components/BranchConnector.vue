@@ -63,7 +63,7 @@ export default class BranchConnector extends Vue {
 
 <style lang="scss">
 .branch-connector {
-  stroke: var(--clr-text);
+  stroke: currentColor;
   stroke-width: 0.2rem;
   fill: none;
   overflow: visible;

@@ -3,7 +3,7 @@
     class="team"
     @mousedown="startDraging"
     @mouseup="stopDraging"
-    :style="`transform: translate(${x}px, ${y}px)`"
+    :style="`transform: translate(${x}px, ${y}px); background-color: ${team.color}`"
   >
     <h2>{{ team.name }}</h2>
   </div>
@@ -30,6 +30,7 @@ export default class TeamDisplay extends Vue {
   dragOffsetY = 0;
   shift = false;
   slotId = -1;
+  teamId = -1;
 
   get teamSlot(): StoreTeamSlot | undefined {
     return this.$store.getters.slot(this.slotId);
@@ -38,10 +39,19 @@ export default class TeamDisplay extends Vue {
   get teamSlotPos(): StoreSlotCoords | undefined {
     return this.$store.getters.slotPos(this.slotId);
   }
-
   mounted(): void {
+    this.registerTeam();
     this.commitMoveClosest();
     this.moveToCurrentSlot();
+  }
+
+  registerTeam(): void {
+    this.teamId = this.$store.getters.nextTeamId;
+
+    this.$store.commit(Mutations.REGISTER_TEAM, {
+      id: this.teamId,
+      team: this.team,
+    });
   }
 
   moveToCurrentSlot(): void {
@@ -74,12 +84,12 @@ export default class TeamDisplay extends Vue {
     const closestSlot: StoreTeamSlot | undefined =
       this.$store.getters.closestOpenSlot(this.x, this.y);
 
-    console.log(closestSlot?.id);
     const closestId = closestSlot ? closestSlot.id : -1;
 
     this.$store.commit(Mutations.MOVE_SLOT, {
       from: this.slotId,
       to: closestId,
+      team: this.teamId,
     });
     this.slotId = closestId;
   }
@@ -97,7 +107,7 @@ export default class TeamDisplay extends Vue {
       window.innerHeight - (this.bounds?.height || 0)
     );
 
-    //! debouce with if performance too low! <(
+    //! debouce this if performance too low! <(
     // clearTimeout(this.debouceId)
     // this.debounceId = setTimeout( ===>
     const nextSlot: StoreTeamSlot = this.$store.getters.closestOpenSlot(
@@ -125,8 +135,12 @@ export default class TeamDisplay extends Vue {
   background: steelblue;
   width: var(--width-team);
   height: var(--height-team);
-}
-.team:not(.selected) {
-  transition: transform 100ms;
+
+  &:not(.selected) {
+    transition: transform 100ms;
+  }
+  &.selected {
+    z-index: 10;
+  }
 }
 </style>

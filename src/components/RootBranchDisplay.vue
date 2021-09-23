@@ -6,13 +6,14 @@
       :reverse="true"
       :parent-slot-id="_slotId"
       :parent-beaten="beaten"
+      :parent-top-color="passedColor"
     />
 
     <div
-      class="team-placeholder"
+      :class="`team-placeholder`"
       :style="`background-color: ${teamSlot ? teamSlot.color : 'orange'};`"
     >
-      <h2>{{ beaten }}</h2>
+      <h2 :class="beaten ? 'won' : ''">👑</h2>
     </div>
 
     <branch-display
@@ -21,6 +22,7 @@
       :reverse="false"
       :parent-slot-id="_slotId"
       :parent-beaten="beaten"
+      :parent-top-color="passedColor"
     />
   </div>
 </template>
@@ -34,3 +36,15 @@ import BranchDisplay from "./BranchDisplay.vue";
 })
 export default class RootBranchDisplay extends BranchDisplay {}
 </script>
+
+<style lang="scss">
+h2 {
+  transition: top 2s, transform 2s;
+  top: 0;
+  &.won {
+    position: relative;
+    top: -4rem;
+    transform: scale(2);
+  }
+}
+</style>

@@ -16,11 +16,67 @@ export default class CompetitionTeams extends Vue {
   teams: Team[] = [
     {
       name: "yoooo team",
-      color: "#fff",
+      color: "#9A879D",
     },
     {
       name: "TEAM 2 4 U",
-      color: "#fff",
+      color: "#EF233C",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#D80032",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#A49966",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#FF570A",
+    },
+    {
+      name: "yoooo team",
+      color: "#9A879D",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#EF233C",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#D80032",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#A49966",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#FF570A",
+    },
+    {
+      name: "yoooo team",
+      color: "#9A879D",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#EF233C",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#D80032",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#A49966",
+    },
+    {
+      name: "TEAM 2 4 U",
+      color: "#FF570A",
+    },
+    {
+      name: "W4F",
+      color: "#12355B",
     },
   ];
 }

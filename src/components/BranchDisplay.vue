@@ -1,13 +1,12 @@
 <template>
   <div
     class="branch"
-    :style="'flex-direction: ' + (reverse ? 'row-reverse' : 'row') + ';'"
+    :style="`flex-direction: ${
+      reverse ? 'row-reverse' : 'row'
+    };  color: ${displayTextColor}`"
   >
-    <div
-      class="team-placeholder"
-      :style="`background-color: ${teamSlot ? teamSlot.color : 'orange'};`"
-    >
-      <h2>{{ _slotId }}</h2>
+    <div class="team-placeholder" :style="`background-color: ${displayColor};`">
+      <h2>×</h2>
     </div>
     <branch-connector :width="reverse ? -32 : 32" :height="cHeight" />
     <div class="children">
@@ -18,6 +17,7 @@
         :reverse="reverse"
         :parent-slot-id="_slotId"
         :parent-beaten="beaten"
+        :parent-top-color="passedColor"
       />
     </div>
   </div>
@@ -28,6 +28,7 @@ import { Branch, StoreTeamSlot } from "@/types";
 import { Options, Vue } from "vue-class-component";
 import BranchConnector from "@/components/BranchConnector.vue";
 import { Mutations } from "@/store";
+import { SlotColors } from "@/main";
 
 @Options({
   name: "BranchDisplay",
@@ -36,6 +37,7 @@ import { Mutations } from "@/store";
     reverse: Boolean,
     parentSlotId: Number,
     parentBeaten: Boolean,
+    parentTopColor: String,
   },
   components: { BranchDisplay, BranchConnector },
 })
@@ -44,12 +46,38 @@ export default class BranchDisplay extends Vue {
   reverse!: boolean;
   parentSlotId!: number;
   parentBeaten!: boolean;
+  parentTopColor?: string;
 
   slotId = -1;
   cHeight = 0;
 
   get _slotId(): number {
     return this.slotId;
+  }
+
+  get passedColor(): string {
+    return this.teamSlot?.full
+      ? this.teamSlot.color
+      : this.parentTopColor || SlotColors.TEXT;
+  }
+
+  get displayTextColor(): string {
+    const slot = this.teamSlot;
+    if (!slot) return SlotColors.TEXT;
+    if (slot.full)
+      return this.parentBeaten ? SlotColors.TEXT_BEATEN : SlotColors.TEXT;
+    return this.parentTopColor || SlotColors.TEXT;
+  }
+
+  get displayColor(): string {
+    const slot = this.teamSlot;
+    return slot
+      ? slot.color === SlotColors.EMPTY
+        ? this.beaten
+          ? SlotColors.BEATEN
+          : SlotColors.EMPTY
+        : slot.color
+      : SlotColors.LOADING;
   }
 
   get beaten(): boolean {
@@ -108,8 +136,9 @@ export default class BranchDisplay extends Vue {
   position: relative;
 
   .team-placeholder {
+    position: relative;
     margin: 0.5rem 1rem;
-    min-width: var(--width-team);
+    width: var(--width-team);
     height: var(--height-team);
     padding: 0.5rem;
     border-radius: 2rem;

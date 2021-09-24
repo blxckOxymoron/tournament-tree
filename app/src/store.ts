@@ -1,7 +1,22 @@
 import { State } from "vue";
 import { createStore } from "vuex";
 import { SlotColors } from "./main";
-import { Coords2d, StoreTeamSlot, Team } from "./types";
+import {
+  Coords2d,
+  MutationData,
+  StoreTeam,
+  StoreTeamSlot,
+  TransmittedState,
+} from "./types";
+import { io } from "socket.io-client";
+
+const urlParams = new URLSearchParams(window.location.search);
+const socket = io({
+  extraHeaders: {
+    admin: urlParams.get("admin") || "",
+  },
+  reconnectionAttempts: 20,
+});
 
 export const store = createStore({
   state(): State {
@@ -11,10 +26,19 @@ export const store = createStore({
       teams: [],
       nextSlotId: 0,
       nextTeamId: 0,
+      isAdmin: false,
+      tree: null,
     };
   },
   mutations: {
-    registerTeam(state: State, payload: { id: number; team: Team }) {
+    setAll(state: State, payload: { state: TransmittedState }) {
+      state.isAdmin = payload.state.isAdmin;
+      state.teams = payload.state.teams;
+      state.tree = payload.state.tree;
+      state.nextTeamId =
+        payload.state.teams.reduce((acc, val) => Math.max(acc, val.id), -1) + 1;
+    },
+    registerTeam(state: State, payload: { id: number; team: StoreTeam }) {
       state.teams.push({
         ...payload.team,
         id: payload.id,
@@ -35,13 +59,11 @@ export const store = createStore({
       });
       state.nextSlotId++;
     },
-    moveSlot(
-      state: State,
-      payload: { from: number; to: number; team: number }
-    ) {
+    moveTeam(state: State, payload: { to: number; team: number }) {
       const team = state.teams.find((tm) => tm.id === payload.team);
+      const fromSl = state.teamSlots.find((sl) => sl.id === team?.slotId);
       if (team) team.slotId = payload.to;
-      const fromSl = state.teamSlots.find((sl) => sl.id === payload.from);
+
       if (fromSl) {
         fromSl.full = false;
         fromSl.color = SlotColors.EMPTY;
@@ -51,6 +73,13 @@ export const store = createStore({
         toSl.full = true;
         toSl.color = team?.color || SlotColors.EMPTY;
       }
+
+      const mutData: MutationData = {
+        name: Mutations.MOVE_TEAM,
+        fromId: socket.id,
+        payload,
+      };
+      socket.emit("mutation", mutData);
     },
     markSnapSlot(
       state: State,
@@ -102,13 +131,27 @@ export const store = createStore({
       return state.nextTeamId;
     },
   },
+  actions: {
+    setupSocket({ commit }) {
+      socket.on("mutation", (data: MutationData) => {
+        if (data.fromId === socket.id) return;
+        if (!Object.values(Mutations).includes(data.name)) return;
+        commit(data.name, data.payload);
+      });
+    },
+  },
 });
 
 export const Mutations = {
   REGISTER_SLOT: "registerSlot",
   REGISTER_TEAM: "registerTeam",
-  MOVE_SLOT: "moveSlot",
+  MOVE_TEAM: "moveTeam",
   MARK_SNAP_SLOT: "markSnapSlot",
+  SET_ALL: "setAll",
+};
+
+export const Actions = {
+  SETUP_SOCKET: "setupSocket",
 };
 
 function pointDistance(p1: Coords2d, p2: Coords2d) {

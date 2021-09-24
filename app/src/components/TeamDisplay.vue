@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { Mutations } from "@/store";
-import { StoreSlotCoords, StoreTeamSlot, Team } from "@/types";
+import { StoreSlotCoords, StoreTeam, StoreTeamSlot } from "@/types";
 import { Options, Vue } from "vue-class-component";
 
 @Options({
@@ -21,7 +21,7 @@ import { Options, Vue } from "vue-class-component";
   },
 })
 export default class TeamDisplay extends Vue {
-  team!: Team;
+  team!: StoreTeam;
 
   dragX = 0;
   dragY = 0;
@@ -30,6 +30,10 @@ export default class TeamDisplay extends Vue {
   dragOffsetY = 0;
   teamId = -1;
   draging = false;
+
+  get isAdmin(): boolean {
+    return this.$store.state.isAdmin;
+  }
 
   get x(): number {
     return this.draging ? this.dragX : this.teamSlotPos?.x || 0;
@@ -50,12 +54,13 @@ export default class TeamDisplay extends Vue {
   get teamSlotPos(): StoreSlotCoords | undefined {
     return this.$store.getters.slotPos(this.slotId);
   }
+
   mounted(): void {
-    this.registerTeam();
-    this.commitMoveClosest();
-    this.moveToCurrentSlot();
+    this.teamId = this.team.id;
+    if (this.isAdmin) this.commitMoveClosest();
   }
 
+  //! ids should be defined by the socket
   registerTeam(): void {
     this.teamId = this.$store.getters.nextTeamId;
 
@@ -65,13 +70,9 @@ export default class TeamDisplay extends Vue {
     });
   }
 
-  moveToCurrentSlot(): void {
-    this.dragX = this.teamSlotPos?.x || 0;
-    this.dragY = this.teamSlotPos?.y || 0;
-  }
-
   startDraging(e: PointerEvent): void {
     if (!(this.$el instanceof HTMLElement)) return;
+    if (!this.isAdmin) return;
     this.dragX = this.x;
     this.dragY = this.y;
     this.draging = true;
@@ -86,13 +87,13 @@ export default class TeamDisplay extends Vue {
 
   stopDraging(e: PointerEvent): void {
     if (!(this.$el instanceof HTMLElement)) return;
+    if (!this.isAdmin) return;
     this.draging = false;
     this.$el.onpointermove = null;
     this.$el.classList.remove("selected");
 
     this.$el.releasePointerCapture(e.pointerId);
     this.commitMoveClosest();
-    this.moveToCurrentSlot();
   }
 
   commitMoveClosest(): void {
@@ -101,8 +102,7 @@ export default class TeamDisplay extends Vue {
 
     const closestId = closestSlot ? closestSlot.id : -1;
 
-    this.$store.commit(Mutations.MOVE_SLOT, {
-      from: this.slotId,
+    this.$store.commit(Mutations.MOVE_TEAM, {
       to: closestId,
       team: this.teamId,
     });

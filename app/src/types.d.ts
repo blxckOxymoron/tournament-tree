@@ -6,6 +6,10 @@ export interface IdBranch extends Branch {
   id: number;
 }
 
+export interface RootBranch extends Branch {
+  sub: [Branch, Branch];
+}
+
 export interface Coords2d {
   x: number;
   y: number;
@@ -29,4 +33,16 @@ export interface Team {
 export interface StoreTeam extends Team {
   id: number;
   slotId: number;
+}
+
+export interface MutationData {
+  fromId: string;
+  name: string;
+  payload: Record<string, unknown>;
+}
+
+export interface TransmittedState {
+  teams: StoreTeam[];
+  isAdmin: boolean;
+  tree: RootBranch;
 }

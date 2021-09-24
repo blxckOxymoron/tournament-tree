@@ -1,6 +1,6 @@
 // vuex.d.ts
 import { Store } from "vuex";
-import { StoreSlotCoords, StoreTeamSlot, StoreTeam } from "./types";
+import { StoreSlotCoords, StoreTeamSlot, StoreTeam, RootBranch } from "./types";
 
 declare module "@vue/runtime-core" {
   // declare your own store states
@@ -10,6 +10,8 @@ declare module "@vue/runtime-core" {
     teams: StoreTeam[];
     nextSlotId: number;
     nextTeamId: number;
+    isAdmin: boolean;
+    tree: RootBranch | null;
   }
 
   // provide typings for `this.$store`

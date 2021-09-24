@@ -23,14 +23,25 @@ import { Options, Vue } from "vue-class-component";
 export default class TeamDisplay extends Vue {
   team!: Team;
 
-  x = 0;
-  y = 0;
+  dragX = 0;
+  dragY = 0;
 
   dragOffsetX = 0;
   dragOffsetY = 0;
-  shift = false;
-  slotId = -1;
   teamId = -1;
+  draging = false;
+
+  get x(): number {
+    return this.draging ? this.dragX : this.teamSlotPos?.x || 0;
+  }
+  get y(): number {
+    return this.draging ? this.dragY : this.teamSlotPos?.y || 0;
+  }
+
+  get slotId(): number {
+    const team = this.$store.getters.team(this.teamId);
+    return team ? team.slotId : -1;
+  }
 
   get teamSlot(): StoreTeamSlot | undefined {
     return this.$store.getters.slot(this.slotId);
@@ -55,14 +66,17 @@ export default class TeamDisplay extends Vue {
   }
 
   moveToCurrentSlot(): void {
-    this.x = this.teamSlotPos?.x || 0;
-    this.y = this.teamSlotPos?.y || 0;
+    this.dragX = this.teamSlotPos?.x || 0;
+    this.dragY = this.teamSlotPos?.y || 0;
   }
 
   startDraging(e: PointerEvent): void {
     if (!(this.$el instanceof HTMLElement)) return;
-    this.dragOffsetX = e.clientX - this.x;
-    this.dragOffsetY = e.clientY - this.y;
+    this.dragX = this.x;
+    this.dragY = this.y;
+    this.draging = true;
+    this.dragOffsetX = e.clientX - this.dragX;
+    this.dragOffsetY = e.clientY - this.dragY;
 
     this.$el.onpointermove = this.drag;
     this.$el.classList.add("selected");
@@ -72,6 +86,7 @@ export default class TeamDisplay extends Vue {
 
   stopDraging(e: PointerEvent): void {
     if (!(this.$el instanceof HTMLElement)) return;
+    this.draging = false;
     this.$el.onpointermove = null;
     this.$el.classList.remove("selected");
 
@@ -82,7 +97,7 @@ export default class TeamDisplay extends Vue {
 
   commitMoveClosest(): void {
     const closestSlot: StoreTeamSlot | undefined =
-      this.$store.getters.closestOpenSlot(this.x, this.y);
+      this.$store.getters.closestOpenSlot(this.dragX, this.dragY);
 
     const closestId = closestSlot ? closestSlot.id : -1;
 
@@ -91,19 +106,18 @@ export default class TeamDisplay extends Vue {
       to: closestId,
       team: this.teamId,
     });
-    this.slotId = closestId;
   }
 
   drag(e: PointerEvent): void {
-    this.x = e.clientX - this.dragOffsetX;
-    this.y = e.clientY - this.dragOffsetY;
+    this.dragX = e.clientX - this.dragOffsetX;
+    this.dragY = e.clientY - this.dragOffsetY;
 
-    this.x = Math.min(
-      Math.max(0, this.x),
+    this.dragX = Math.min(
+      Math.max(0, this.dragX),
       window.innerWidth - (this.bounds?.width || 0)
     );
-    this.y = Math.min(
-      Math.max(0, this.y),
+    this.dragY = Math.min(
+      Math.max(0, this.dragY),
       window.innerHeight - (this.bounds?.height || 0)
     );
 
@@ -111,8 +125,8 @@ export default class TeamDisplay extends Vue {
     // clearTimeout(this.debouceId)
     // this.debounceId = setTimeout( ===>
     const nextSlot: StoreTeamSlot = this.$store.getters.closestOpenSlot(
-      this.x,
-      this.y
+      this.dragX,
+      this.dragY
     );
 
     this.$store.commit(Mutations.MARK_SNAP_SLOT, { id: nextSlot.id });

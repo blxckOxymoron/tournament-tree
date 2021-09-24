@@ -28,4 +28,5 @@ export interface Team {
 
 export interface StoreTeam extends Team {
   id: number;
+  slotId: number;
 }

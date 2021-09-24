@@ -18,6 +18,7 @@ export const store = createStore({
       state.teams.push({
         ...payload.team,
         id: payload.id,
+        slotId: -1,
       });
       state.nextTeamId++;
     },
@@ -38,6 +39,8 @@ export const store = createStore({
       state: State,
       payload: { from: number; to: number; team: number }
     ) {
+      const team = state.teams.find((tm) => tm.id === payload.team);
+      if (team) team.slotId = payload.to;
       const fromSl = state.teamSlots.find((sl) => sl.id === payload.from);
       if (fromSl) {
         fromSl.full = false;
@@ -46,9 +49,7 @@ export const store = createStore({
       const toSl = state.teamSlots.find((sl) => sl.id === payload.to);
       if (toSl) {
         toSl.full = true;
-        toSl.color =
-          state.teams.find((tm) => tm.id === payload.team)?.color ||
-          SlotColors.EMPTY;
+        toSl.color = team?.color || SlotColors.EMPTY;
       }
     },
     markSnapSlot(

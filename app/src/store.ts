@@ -18,6 +18,9 @@ const socket = io({
   reconnectionAttempts: 20,
 });
 
+window.history.replaceState({}, document.title, window.location.pathname);
+console.log(urlParams.get("admin"));
+
 export const store = createStore({
   state(): State {
     return {
@@ -47,10 +50,11 @@ export const store = createStore({
       state.nextTeamId++;
     },
     registerSlot(state: State, payload: { id: number; pos: Coords2d }) {
+      const team = state.teams.find((tm) => tm.slotId === payload.id);
       state.teamSlots.push({
         id: payload.id,
-        full: false,
-        color: SlotColors.EMPTY,
+        full: !!team,
+        color: team?.color || SlotColors.EMPTY,
       });
       state.slotPositions.push({
         id: payload.id,
@@ -59,7 +63,10 @@ export const store = createStore({
       });
       state.nextSlotId++;
     },
-    moveTeam(state: State, payload: { to: number; team: number }) {
+    moveTeam(
+      state: State,
+      payload: { to: number; team: number; fromServer?: boolean }
+    ) {
       const team = state.teams.find((tm) => tm.id === payload.team);
       const fromSl = state.teamSlots.find((sl) => sl.id === team?.slotId);
       if (team) team.slotId = payload.to;
@@ -79,7 +86,7 @@ export const store = createStore({
         fromId: socket.id,
         payload,
       };
-      socket.emit("mutation", mutData);
+      if (!payload.fromServer) socket.emit("mutation", mutData);
     },
     markSnapSlot(
       state: State,
@@ -136,6 +143,7 @@ export const store = createStore({
       socket.on("mutation", (data: MutationData) => {
         if (data.fromId === socket.id) return;
         if (!Object.values(Mutations).includes(data.name)) return;
+        data.payload.fromServer = true;
         commit(data.name, data.payload);
       });
     },

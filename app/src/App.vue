@@ -1,6 +1,6 @@
 <template>
-  <competition-tree />
   <competition-teams />
+  <competition-tree />
 </template>
 
 <script lang="ts">
@@ -16,6 +16,7 @@ export default class App extends Vue {
   mounted(): void {
     this.$store.dispatch(Actions.SETUP_SOCKET);
     setTimeout(this.simulateData, 2e3);
+    setTimeout(this.simulateMove, 4e3);
   }
 
   simulateData(): void {
@@ -137,6 +138,14 @@ export default class App extends Vue {
       teams: teams.map((tm, i) => ({ ...tm, id: i })),
     };
     this.$store.commit(Mutations.SET_ALL, { state });
+  }
+  simulateMove(): void {
+    let data = {
+      name: Mutations.MOVE_TEAM,
+      payload: { team: 2, to: 20, fromServer: false },
+    };
+    data.payload.fromServer = true;
+    this.$store.commit(data.name, data.payload);
   }
 }
 </script>

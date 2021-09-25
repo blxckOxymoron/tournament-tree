@@ -57,7 +57,6 @@ export default class TeamDisplay extends Vue {
 
   mounted(): void {
     this.teamId = this.team.id;
-    if (this.isAdmin) this.commitMoveClosest();
   }
 
   //! ids should be defined by the socket

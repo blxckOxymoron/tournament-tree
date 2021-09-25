@@ -3,99 +3,38 @@ import express from "express";
 import { config } from "dotenv";
 import { env } from "process";
 import { Server } from "socket.io";
-import { Branch, MutationData, RootBranch, State, Team, TransmittedMutations } from "./appTypes";
-
+import { MutationData, RootBranch, TransmittedState } from "./types";
+import { ConfigTeam } from "./types";
+import { readFileSync } from 'fs'
 config();
+
+const TransmittedMutations = {
+  MOVE_TEAM: "moveTeam",
+}
+const Mutations = {
+  REGISTER_SLOT: "registerSlot",
+  REGISTER_TEAM: "registerTeam",
+  MOVE_TEAM: "moveTeam",
+  MARK_SNAP_SLOT: "markSnapSlot",
+  SET_ALL: "setAll",
+}
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
-// crypto.randomBytes(32).toString('hex')
-const adminId =
-  "3ff8d9c6fa86e7f47bc0309d8600bb4af3e7bfdc302f354ea4b376aa4544503b";
-let teams: Team[] = [
-  {
-    name: "yoooo team",
-    color: "#9A879D",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#EF233C",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#D80032",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#A49966",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#FF570A",
-  },
-  {
-    name: "yoooo team",
-    color: "#9A879D",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#EF233C",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#D80032",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#A49966",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#FF570A",
-  },
-  {
-    name: "yoooo team",
-    color: "#9A879D",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#EF233C",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#D80032",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#A49966",
-  },
-  {
-    name: "TEAM 2 4 U",
-    color: "#FF570A",
-  },
-  {
-    name: "W4F",
-    color: "#12355B",
-  },
-];
-let wmBranch: Branch = {
-  sub: Array<Branch>(2).fill({
-    sub: Array<Branch>(2).fill({
-      sub: Array<Branch>(2).fill({
-        sub: [],
-      }),
-    }),
-  }),
-};
-let tree: RootBranch = {
-  sub: [wmBranch, wmBranch],
-};
 
-let store: State = {
+const tournamentConfig = JSON.parse(readFileSync("./config.json").toString());
+const teamsTemplate: ConfigTeam[] = tournamentConfig.teamsTemplate;
+const tree: RootBranch = tournamentConfig.tree;
+const adminId: string = tournamentConfig.adminId;
 
-}
-
+let teams = teamsTemplate.map((team, i) => {
+  return {
+    slotId: -1,
+    ...team,
+    id: i,
+  }
+})
 
 app.use(express.static("public"));
 
@@ -105,12 +44,23 @@ app.all("/online", (_req, res) => {
 
 io.on("connection", (socket) => {
   //* send current state => branches, teams, slots
-
+  let state: TransmittedState = {
+    teams,
+    isAdmin: socket.client.request.headers["admin"] === adminId,
+    tree,
+  }
+  socket.emit("mutation", {
+    name: Mutations.SET_ALL,
+    payload: { state }
+  })
   //* handle Mutations
 
-  socket.on("mutation", (data) => {
+  socket.on("mutation", (data: any) => {
     if (socket.client.request.headers["admin"] !== adminId) return;
-    if (!Object.values(TransmittedMutations).find(data.name)) return;
+    if (!('name' in data && 'payload' in data)) return;
+    if (!Object.values(TransmittedMutations).includes(data.name)) return;
+
+    if (data.name === Mutations.MOVE_TEAM) moveTeam(data.payload);
 
     const mutationData: MutationData = {
       fromId: socket.id,
@@ -124,6 +74,13 @@ io.on("connection", (socket) => {
     io.emit("chat message", msg);
   });
 });
+
 server.listen(env["SERVER_PORT"] || 3000, () => {
   console.log("listening on *:" + env["SERVER_PORT"] || 3000);
 });
+
+function moveTeam(payload: { to: number; team: number; }): void {
+  const team = teams.find((tm) => tm.id === payload.team);
+  if (!team) return;
+  team.slotId = payload.to
+}

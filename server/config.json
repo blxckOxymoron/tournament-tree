@@ -1,0 +1,178 @@
+{
+  "teamsTemplate": [
+      {
+        "name": "TEAM",
+        "color": "#12355B",
+        "slotId": 30
+      },
+      {
+        "name": "TEAM",
+        "color": "#9A879D"
+      },
+      {
+        "name": "TEAM",
+        "color": "#EF233C"
+      },
+      {
+        "name": "TEAM",
+        "color": "#D80032"
+      },
+      {
+        "name": "TEAM",
+        "color": "#A49966"
+      },
+      {
+        "name": "TEAM",
+        "color": "#FF570A"
+      },
+      {
+        "name": "TEAM",
+        "color": "#9A879D"
+      },
+      {
+        "name": "TEAM",
+        "color": "#EF233C"
+      },
+      {
+        "name": "TEAM",
+        "color": "#D80032"
+      },
+      {
+        "name": "TEAM",
+        "color": "#A49966"
+      },
+      {
+        "name": "TEAM",
+        "color": "#FF570A"
+      },
+      {
+        "name": "TEAM",
+        "color": "#9A879D"
+      },
+      {
+        "name": "TEAM",
+        "color": "#EF233C"
+      },
+      {
+        "name": "TEAM",
+        "color": "#D80032"
+      },
+      {
+        "name": "TEAM",
+        "color": "#A49966"
+      },
+      {
+        "name": "TEAM",
+        "color": "#FF570A"
+      }
+    ],
+  "tree": {
+    "sub": [
+      { 
+        "sub": [
+          {
+            "sub": [
+              {
+                "sub": [
+                  {
+                    "sub": []
+                  },
+                  {
+                    "sub": []
+                  }
+                ]
+              },
+              {
+                "sub": [
+                  {
+                    "sub": []
+                  },
+                  {
+                    "sub": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "sub": [
+              {
+                "sub": [
+                  {
+                    "sub": []
+                  },
+                  {
+                    "sub": []
+                  }
+                ]
+              },
+              {
+                "sub": [
+                  {
+                    "sub": []
+                  },
+                  {
+                    "sub": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      { 
+        "sub": [
+          {
+            "sub": [
+              {
+                "sub": [
+                  {
+                    "sub": []
+                  },
+                  {
+                    "sub": []
+                  }
+                ]
+              },
+              {
+                "sub": [
+                  {
+                    "sub": []
+                  },
+                  {
+                    "sub": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "sub": [
+              {
+                "sub": [
+                  {
+                    "sub": []
+                  },
+                  {
+                    "sub": []
+                  }
+                ]
+              },
+              {
+                "sub": [
+                  {
+                    "sub": []
+                  },
+                  {
+                    "sub": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "adminId": "3wf8d9c6fa86e7f47bc0309d8600bb4af3e7bfdc302f354ea4b376aa4544503b"
+}

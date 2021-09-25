@@ -15,8 +15,8 @@ import { Branch, RootBranch, StoreTeam, TransmittedState } from "./types";
 export default class App extends Vue {
   mounted(): void {
     this.$store.dispatch(Actions.SETUP_SOCKET);
-    setTimeout(this.simulateData, 2e3);
-    setTimeout(this.simulateMove, 4e3);
+    // setTimeout(this.simulateData, 2e3);
+    // setTimeout(this.simulateMove, 4e3);
   }
 
   simulateData(): void {

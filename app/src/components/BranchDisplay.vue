@@ -5,7 +5,12 @@
       reverse ? 'row-reverse' : 'row'
     };  color: ${displayTextColor}`"
   >
-    <div class="team-placeholder" :style="`background-color: ${displayColor};`">
+    <div
+      :class="`team-placeholder ${
+        parentBeaten && teamSlot.full ? 'beaten' : ''
+      }`"
+      :style="`background-color: ${displayColor};`"
+    >
       <h2>×</h2>
     </div>
     <branch-connector :width="reverse ? -32 : 32" :height="cHeight" />
@@ -146,6 +151,20 @@ export default class BranchDisplay extends Vue {
     background-color: var(--clr-slot-empty);
     user-select: none;
     transition: background-color 100ms;
+
+    &.beaten::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: inherit;
+      height: inherit;
+      padding: inherit;
+      border-radius: inherit;
+      z-index: 1;
+      background-blend-mode: overlay;
+      background-image: var(--img-beaten);
+    }
   }
 }
 .children {

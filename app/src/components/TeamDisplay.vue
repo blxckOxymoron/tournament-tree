@@ -78,20 +78,23 @@ export default class TeamDisplay extends Vue {
     this.dragOffsetX = e.clientX - this.dragX;
     this.dragOffsetY = e.clientY - this.dragY;
 
-    this.$el.onpointermove = this.drag;
+    document.body.onpointermove = this.drag;
+    // this.$el.onpointermove = this.drag;
     this.$el.classList.add("selected");
 
-    this.$el.setPointerCapture(e.pointerId);
+    // this.$el.setPointerCapture(e.pointerId);
   }
 
   stopDraging(e: PointerEvent): void {
     if (!(this.$el instanceof HTMLElement)) return;
     if (!this.isAdmin) return;
     this.draging = false;
-    this.$el.onpointermove = null;
+
+    document.body.onpointermove = null;
+    // this.$el.onpointermove = null;
     this.$el.classList.remove("selected");
 
-    this.$el.releasePointerCapture(e.pointerId);
+    // this.$el.releasePointerCapture(e.pointerId);
     this.commitMoveClosest();
   }
 
